@@ -2,5 +2,5 @@
 **/.DS_Store
 
 # Xcode filer ska inte inkluderas
-*.xcodeproj
+/baller.xcodeproj/*
 
