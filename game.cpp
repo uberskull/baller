@@ -48,6 +48,8 @@ void game::render(SDL_Renderer *renderer)
 
     // update screen
     SDL_RenderPresent(renderer);
+    
+
 }
 
 void game::run()
