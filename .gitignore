@@ -1,0 +1,6 @@
+# Mac systemfiler som inte ska inkluderas
+**/.DS_Store
+
+# Xcode filer ska inte inkluderas
+*.xcodeproj
+

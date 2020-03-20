@@ -1,0 +1,9 @@
+# Set default behavior
+* text=auto
+
+# These files should be normalized and converted
+*.cpp text
+*.h text
+*.hpp text
+*.c text
+
