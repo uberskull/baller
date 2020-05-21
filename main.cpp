@@ -1,60 +1,40 @@
 
-
 #include "SDL.h"
 #include <OpenGLES/ES2/gl.h>
 #include <OpenGLES/ES2/glext.h>
-#include <iostream>
 #include <string>
 #include <memory>
 
 GLuint programObject;
-
-class Graphics
-{
-private:
-    
-    SDL_Window* _window;
-    
-public:
-    Graphics(SDL_Window* window)
-    {
-        _window = window;
-    }
-    
-    void update()
-    {
-        glClearColor(255.0f, 0.0f, 255.0f, 1);
-        
-        GLfloat vVertices[] =
-        {
-            0.0f, 1.0f, 0.0f,
-            -1.0f, -1.0f, 0.0f,
-            1.0f, -1.0f, 0.0f
-        };
-        
-        glViewport (0, 0, 320, 480);
-        
-        glColorMask (GL_TRUE, GL_TRUE, GL_TRUE, GL_FALSE);
-        glClear (GL_COLOR_BUFFER_BIT);
-        
-        glUseProgram (programObject);
-        
-        glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, 0, vVertices);
-        
-        glEnableVertexAttribArray (0);
-        glDrawArrays (GL_TRIANGLES, 0, 3);
-
-        SDL_GL_SwapWindow(_window);
-    }
-};
+SDL_Window* _window;
 
 void UpdateFrame(void* param)
 {
-    Graphics* graphics = (Graphics*)param;
-    graphics->update();
+    glClearColor(255.0f, 0.0f, 255.0f, 1);
+    
+    GLfloat vVertices[] =
+    {
+        0.0f, 1.0f, 0.0f,
+        -1.0f, -1.0f, 0.0f,
+        1.0f, -1.0f, 0.0f
+    };
+    
+    glViewport(0, 0, 320, 480);
+    
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_FALSE);
+    glClear(GL_COLOR_BUFFER_BIT);
+    
+    glUseProgram(programObject);
+    
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, vVertices);
+    
+    glEnableVertexAttribArray (0);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+
+    SDL_GL_SwapWindow(_window);
 }
 
-void check_gl_error()
+void checkGlError()
 {
     GLenum err (glGetError());
     
@@ -93,19 +73,18 @@ GLuint LoadShader(GLenum type, const GLchar *shaderSrc)
     GLuint shader;
     GLint compiled;
     // Create the shader object
-    check_gl_error();
+    checkGlError();
 
     shader = glCreateShader(type);
-    check_gl_error();
+    checkGlError();
 
     if(shader == 0)
     {
-        SDL_Log("Could not create OpenGL shader\n");
+        SDL_Log("Could not create OpenGL shader");
         return 0;
     }
     
     // Load the shader source
-    
     glShaderSource(shader, 1, &shaderSrc, NULL);
     
     // Compile the shader
@@ -143,17 +122,17 @@ bool parseFileIntoString(const char *fileName, char *string, int maxLength)
     
     if(!file)
     {
-        SDL_Log("ERROR: opening file for reading: %s\n", fileName);
+        SDL_Log("ERROR: opening file for reading: %s", fileName);
         return false;
     }
     size_t count = fread(string, 1, maxLength - 1, file);
     if((int)count >= maxLength - 1)
     {
-        SDL_Log("WARNING: file %s too big - truncated.\n", fileName);
+        SDL_Log("WARNING: file %s too big - truncated.", fileName);
     }
     if(ferror(file))
     {
-        SDL_Log("ERROR: reading shader file %s\n", fileName);
+        SDL_Log("ERROR: reading shader file %s", fileName);
         fclose(file);
         return false;
     }
@@ -204,7 +183,7 @@ int Init()
         
         glGetProgramiv (programObject, GL_INFO_LOG_LENGTH, &infoLen);
         
-        if (infoLen > 1)
+        if(infoLen > 1)
         {
             
             char* infoLog = (char*) malloc (sizeof (char) * infoLen);
@@ -259,23 +238,23 @@ int main(int argc, char** argv)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
     // create window and renderer
-    SDL_Window* window = SDL_CreateWindow(NULL, 0, 0, displayMode.w, displayMode.h, SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE);
+    _window = SDL_CreateWindow(NULL, 0, 0, displayMode.w, displayMode.h,
+                                          SDL_WINDOW_OPENGL|SDL_WINDOW_FULLSCREEN|SDL_WINDOW_RESIZABLE);
     
-    if(!window)
+    if(!_window)
     {
-        SDL_Log("Could not initialize Window\n");
+        SDL_Log("Could not initialize Window");
         return 1;
     }
     
-    auto gl = SDL_GL_CreateContext(window);
+    auto gl = SDL_GL_CreateContext(_window);
     if (!Init())
     {
-        SDL_Log("Error initializing OpenGL\n");
+        SDL_Log("Error initializing OpenGL");
         return 1;
     }
     
-    std::unique_ptr<Graphics> graphics = std::unique_ptr<Graphics>(new Graphics(window));
-    SDL_iPhoneSetAnimationCallback(window, 1, UpdateFrame, graphics.get());
+    SDL_iPhoneSetAnimationCallback(_window, 1, UpdateFrame, NULL);
     SDL_AddEventWatch(EventFilter, NULL);
     
     //Game Loop
@@ -290,31 +269,31 @@ int main(int argc, char** argv)
             {
                 case SDL_QUIT:
                     done = true;
-                    break;
+                break;
                     
                 case SDL_APP_DIDENTERFOREGROUND:
                     SDL_Log("SDL_APP_DIDENTERFOREGROUND");
-                    break;
+                break;
                     
                 case SDL_APP_DIDENTERBACKGROUND:
                     SDL_Log("SDL_APP_DIDENTERBACKGROUND");
-                    break;
+                break;
                     
                 case SDL_APP_LOWMEMORY:
                     SDL_Log("SDL_APP_LOWMEMORY");
-                    break;
+                break;
                     
                 case SDL_APP_TERMINATING:
                     SDL_Log("SDL_APP_TERMINATING");
-                    break;
+                break;
                     
                 case SDL_APP_WILLENTERBACKGROUND:
                     SDL_Log("SDL_APP_WILLENTERBACKGROUND");
-                    break;
+                break;
                     
                 case SDL_APP_WILLENTERFOREGROUND:
                     SDL_Log("SDL_APP_WILLENTERFOREGROUND");
-                    break;
+                break;
                     
                 case SDL_WINDOWEVENT:
                 {
@@ -333,9 +312,8 @@ int main(int argc, char** argv)
     }
     
     SDL_GL_DeleteContext(gl);
-    
     // Done! Close the window, clean-up and exit the program.
-    SDL_DestroyWindow(window);
+    SDL_DestroyWindow(_window);
     SDL_Quit();
     
     return 0;
