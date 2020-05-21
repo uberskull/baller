@@ -6,7 +6,7 @@
 #include <iostream>
 #include <string>
 #include <memory>
-using namespace std;
+
 GLuint programObject;
 
 class Graphics
@@ -24,7 +24,9 @@ public:
     void update()
     {
         glClearColor(255.0f, 0.0f, 255.0f, 1);
-        GLfloat vVertices[] = {
+        
+        GLfloat vVertices[] =
+        {
             0.0f, 1.0f, 0.0f,
             -1.0f, -1.0f, 0.0f,
             1.0f, -1.0f, 0.0f
@@ -56,21 +58,31 @@ void check_gl_error()
 {
     GLenum err (glGetError());
     
-    while(err!=GL_NO_ERROR)
+    while(err != GL_NO_ERROR)
     {
-        string error;
+        char error[40];
         
         switch(err)
         {
-            case GL_INVALID_OPERATION:      error="INVALID_OPERATION";      break;
-            case GL_INVALID_ENUM:           error="INVALID_ENUM";           break;
-            case GL_INVALID_VALUE:          error="INVALID_VALUE";          break;
-            case GL_OUT_OF_MEMORY:          error="OUT_OF_MEMORY";          break;
-            case GL_INVALID_FRAMEBUFFER_OPERATION:  error="INVALID_FRAMEBUFFER_OPERATION";  break;
+            case GL_INVALID_OPERATION:
+                strncpy(error, "INVALID_OPERATION", sizeof("INVALID_OPERATION"));
+            break;
+            case GL_INVALID_ENUM:
+                strncpy(error, "INVALID_ENUM", sizeof("INVALID_ENUM"));
+            break;
+            case GL_INVALID_VALUE:
+                strncpy(error, "INVALID_VALUE", sizeof("INVALID_VALUE"));
+            break;
+            case GL_OUT_OF_MEMORY:
+                strncpy(error, "OUT_OF_MEMORY", sizeof("OUT_OF_MEMORY"));
+            break;
+            case GL_INVALID_FRAMEBUFFER_OPERATION:
+                strncpy(error, "INVALID_FRAMEBUFFER_OPERATION", sizeof("INVALID_FRAMEBUFFER_OPERATION"));
+            break;
         }
         
-        cerr << "GL_" << error.c_str() <<" - "<<endl;
-        err=glGetError();
+        SDL_Log("Error: %s", error);
+        err = glGetError();
     }
 }///
 // Create a shader object, load the shader source, and
@@ -88,7 +100,7 @@ GLuint LoadShader(GLenum type, const GLchar *shaderSrc)
 
     if(shader == 0)
     {
-        cerr << "Could not create OpenGL shader " << endl;
+        SDL_Log("Could not create OpenGL shader\n");
         return 0;
     }
     
@@ -124,25 +136,43 @@ GLuint LoadShader(GLenum type, const GLchar *shaderSrc)
     return shader;
     
 }
+
+bool parseFileIntoString(const char *fileName, char *string, int maxLength)
+{
+    FILE *file = fopen(fileName, "r");
+    
+    if(!file)
+    {
+        SDL_Log("ERROR: opening file for reading: %s\n", fileName);
+        return false;
+    }
+    size_t count = fread(string, 1, maxLength - 1, file);
+    if((int)count >= maxLength - 1)
+    {
+        SDL_Log("WARNING: file %s too big - truncated.\n", fileName);
+    }
+    if(ferror(file))
+    {
+        SDL_Log("ERROR: reading shader file %s\n", fileName);
+        fclose(file);
+        return false;
+    }
+    // append \0 to end of file string
+    string[count] = 0;
+    fclose(file);
+    return true;
+}
+
 ///
 // Initialize the shader and program object
 //
 int Init()
 {
+    char vertexShaderString[900];
+    char fragmentShaderString[900];
     
-    const char vertexShaderString[] =
-    "attribute vec4 vPosition;    \n"
-    "void main()                  \n"
-    "{                            \n"
-    "   gl_Position = vPosition;  \n"
-    "}                            \n";
-    
-    const char fragmentShaderString[] =
-    "precision mediump float;\n"\
-    "void main()                                  \n"
-    "{                                            \n"
-    "  gl_FragColor = vec4 ( 1.0, 0.0, 0.0, 1.0 );\n"
-    "}                                            \n";
+    parseFileIntoString("vertexshader.glsl", vertexShaderString, sizeof(vertexShaderString));
+    parseFileIntoString("fragmentshader.glsl", fragmentShaderString, sizeof(fragmentShaderString));
     
     GLuint vertexShader;
     GLuint fragmentShader;
@@ -153,20 +183,20 @@ int Init()
     
     programObject = glCreateProgram();
     
-    if (programObject == 0)
+    if(programObject == 0)
     {
         
-        cerr << "Could not create OpenGL program" << endl;
+        SDL_Log("Could not create OpenGL program");
         return 0;
         
     }
     
-    glAttachShader (programObject, vertexShader);
-    glAttachShader (programObject, fragmentShader);
+    glAttachShader(programObject, vertexShader);
+    glAttachShader(programObject, fragmentShader);
     glBindAttribLocation (programObject, 0, "vPosition");
-    glLinkProgram (programObject);
+    glLinkProgram(programObject);
     
-    glGetProgramiv (programObject, GL_LINK_STATUS, &linked);
+    glGetProgramiv(programObject, GL_LINK_STATUS, &linked);
     
     if(!linked)
     {
@@ -179,12 +209,12 @@ int Init()
             
             char* infoLog = (char*) malloc (sizeof (char) * infoLen);
             glGetProgramInfoLog (programObject, infoLen, NULL, infoLog);
-            cerr << "Error linking program: " << infoLog << endl;
+            SDL_Log("Error linking program: %s", infoLog);
             free (infoLog);
             
         }
         
-        glDeleteProgram (programObject);
+        glDeleteProgram(programObject);
         return 0;
         
     }
@@ -219,7 +249,7 @@ int main(int argc, char** argv)
     // initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
-        printf("Could not initialize SDL\n");
+        SDL_Log("Could not initialize SDL\n");
         return 1;
     }
     
@@ -231,20 +261,20 @@ int main(int argc, char** argv)
     // create window and renderer
     SDL_Window* window = SDL_CreateWindow(NULL, 0, 0, displayMode.w, displayMode.h, SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE);
     
-    if (!window)
+    if(!window)
     {
-        printf("Could not initialize Window\n");
+        SDL_Log("Could not initialize Window\n");
         return 1;
     }
     
     auto gl = SDL_GL_CreateContext(window);
     if (!Init())
     {
-        cerr << "Error initializing OpenGL" << endl;
+        SDL_Log("Error initializing OpenGL\n");
         return 1;
     }
     
-    unique_ptr<Graphics> graphics = unique_ptr<Graphics>(new Graphics(window));
+    std::unique_ptr<Graphics> graphics = std::unique_ptr<Graphics>(new Graphics(window));
     SDL_iPhoneSetAnimationCallback(window, 1, UpdateFrame, graphics.get());
     SDL_AddEventWatch(EventFilter, NULL);
     

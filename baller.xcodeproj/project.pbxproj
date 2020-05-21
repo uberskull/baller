@@ -15,6 +15,8 @@
 		5B4F94812411742F00AE9F6B /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B4F94262411735D00AE9F6B /* AVFoundation.framework */; };
 		5B56583A241FF71400A348AF /* SDL_config.h.cmake in Resources */ = {isa = PBXBuildFile; fileRef = 5B565809241FF71400A348AF /* SDL_config.h.cmake */; };
 		5B56583B241FF71400A348AF /* SDL_config.h.in in Resources */ = {isa = PBXBuildFile; fileRef = 5B56582C241FF71400A348AF /* SDL_config.h.in */; };
+		5BA55D812475906D002939CF /* vertexshader.glsl in Resources */ = {isa = PBXBuildFile; fileRef = 5BA55D802475906D002939CF /* vertexshader.glsl */; };
+		5BA55D8C247590E5002939CF /* fragmentshader.glsl in Resources */ = {isa = PBXBuildFile; fileRef = 5BA55D8B247590E5002939CF /* fragmentshader.glsl */; };
 		5BA76EB424229492003C6DA8 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BA76EB324229492003C6DA8 /* Metal.framework */; };
 		5BC5A4B02430F591008759D0 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5BC5A4AF2430F591008759D0 /* main.cpp */; };
 		945C4F53195AF17F00DBBF61 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 945C4F52195AF17F00DBBF61 /* Default-568h@2x.png */; };
@@ -166,6 +168,8 @@
 		5B565837241FF71400A348AF /* SDL_cpuinfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_cpuinfo.h; sourceTree = "<group>"; };
 		5B565838241FF71400A348AF /* SDL_test_compare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_test_compare.h; sourceTree = "<group>"; };
 		5B565839241FF71400A348AF /* SDL_opengles2_gl2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_opengles2_gl2.h; sourceTree = "<group>"; };
+		5BA55D802475906D002939CF /* vertexshader.glsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = vertexshader.glsl; sourceTree = "<group>"; };
+		5BA55D8B247590E5002939CF /* fragmentshader.glsl */ = {isa = PBXFileReference; lastKnownFileType = text; path = fragmentshader.glsl; sourceTree = "<group>"; };
 		5BA76EB324229492003C6DA8 /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
 		5BC5A4AF2430F591008759D0 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -228,6 +232,8 @@
 			children = (
 				5B4F940D2411728600AE9F6B /* SDL.xcodeproj */,
 				5BC5A4AF2430F591008759D0 /* main.cpp */,
+				5BA55D802475906D002939CF /* vertexshader.glsl */,
+				5BA55D8B247590E5002939CF /* fragmentshader.glsl */,
 			);
 			name = Sources;
 			sourceTree = "<group>";
@@ -474,9 +480,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5BA55D812475906D002939CF /* vertexshader.glsl in Resources */,
 				FD77A07D0E26BD8C00F39101 /* Icon.png in Resources */,
 				5B56583A241FF71400A348AF /* SDL_config.h.cmake in Resources */,
 				FD77A07F0E26BDA900F39101 /* Default.png in Resources */,
+				5BA55D8C247590E5002939CF /* fragmentshader.glsl in Resources */,
 				945C4F53195AF17F00DBBF61 /* Default-568h@2x.png in Resources */,
 				5B56583B241FF71400A348AF /* SDL_config.h.in in Resources */,
 			);
