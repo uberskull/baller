@@ -8,32 +8,6 @@
 GLuint programObject;
 SDL_Window* _window;
 
-void UpdateFrame(void* param)
-{
-    glClearColor(255.0f, 0.0f, 255.0f, 1);
-    
-    GLfloat vVertices[] =
-    {
-        0.0f, 1.0f, 0.0f,
-        -1.0f, -1.0f, 0.0f,
-        1.0f, -1.0f, 0.0f
-    };
-    
-    glViewport(0, 0, 320, 480);
-    
-    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_FALSE);
-    glClear(GL_COLOR_BUFFER_BIT);
-    
-    glUseProgram(programObject);
-    
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, vVertices);
-    
-    glEnableVertexAttribArray (0);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-
-    SDL_GL_SwapWindow(_window);
-}
-
 void checkGlError()
 {
     GLenum err (glGetError());
@@ -64,10 +38,8 @@ void checkGlError()
         SDL_Log("Error: %s", error);
         err = glGetError();
     }
-}///
-// Create a shader object, load the shader source, and
-// compile the shader.
-//
+}
+
 GLuint LoadShader(GLenum type, const GLchar *shaderSrc)
 {
     GLuint shader;
@@ -142,9 +114,6 @@ bool parseFileIntoString(const char *fileName, char *string, int maxLength)
     return true;
 }
 
-///
-// Initialize the shader and program object
-//
 int Init()
 {
     char vertexShaderString[900];
@@ -167,7 +136,6 @@ int Init()
         
         SDL_Log("Could not create OpenGL program");
         return 0;
-        
     }
     
     glAttachShader(programObject, vertexShader);
@@ -192,31 +160,94 @@ int Init()
             free (infoLog);
             
         }
-        
         glDeleteProgram(programObject);
         return 0;
         
     }
-    
     glClearColor (0.0f, 0.0f, 0.0f, 1.0f);
     return true;
 }
 
-int EventFilter(void* userdata, SDL_Event* event)
+void UpdateFrame(void* param)
+{
+    glClearColor(255.0f, 0.0f, 255.0f, 1);
+    
+    GLfloat vVertices[] =
+    {
+        0.0f, 1.0f, 0.0f,
+        -1.0f, -1.0f, 0.0f,
+        1.0f, -1.0f, 0.0f
+    };
+    
+    glViewport(0, 0, 320, 480);
+    
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_FALSE);
+    glClear(GL_COLOR_BUFFER_BIT);
+    
+    glUseProgram(programObject);
+    
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, vVertices);
+    
+    glEnableVertexAttribArray (0);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+
+    SDL_GL_SwapWindow(_window);
+}
+
+int AppEvents(void* userdata, SDL_Event* event)
 {
     switch(event->type)
     {
-        case SDL_FINGERMOTION:
-            SDL_Log("Finger Motion");
+        case SDL_APP_TERMINATING:
+        {
+            SDL_Log("SDL_APP_TERMINATING");
+            /* Terminate the app.
+             Shut everything down before returning from this function. */
             return 0;
-            
-        case SDL_FINGERDOWN:
-            SDL_Log("Finger Down");
+        }
+        case SDL_APP_LOWMEMORY:
+        {
+            SDL_Log("SDL_APP_LOWMEMORY");
+            /* You will get this when your app is paused and iOS wants more memory.
+             Release as much memory as possible.
+             */
             return 0;
-            
-        case SDL_FINGERUP:
-            SDL_Log("Finger Up");
+        }
+        case SDL_APP_WILLENTERBACKGROUND:
+        {
+            SDL_Log("SDL_APP_WILLENTERBACKGROUND");
+            /* Prepare your app to go into the background.  Stop loops, etc.
+             This gets called when the user hits the home button, or gets a call.
+             */
             return 0;
+        }
+        case SDL_APP_DIDENTERBACKGROUND:
+        {
+            SDL_Log("SDL_APP_DIDENTERBACKGROUND");
+            /* This will get called if the user accepted whatever sent your app to the background.
+             If the user got a phone call and canceled it, you'll instead get an
+             SDL_APP_DIDENTERFOREGROUND event and restart your loops.
+             When you get this, you have 5 seconds to save all your state or the app will be terminated.
+             Your app is NOT active at this point.
+             */
+            return 0;
+        }
+        case SDL_APP_WILLENTERFOREGROUND:
+        {
+            SDL_Log("SDL_APP_WILLENTERFOREGROUND");
+            /* This call happens when your app is coming back to the foreground.
+             Restore all your state here.
+             */
+            return 0;
+        }
+        case SDL_APP_DIDENTERFOREGROUND:
+        {
+            SDL_Log("SDL_APP_DIDENTERFOREGROUND");
+            /* Restart your loops here.
+             Your app is interactive and getting CPU again.
+             */
+            return 0;
+        }
     }
     return 1;
 }
@@ -228,7 +259,7 @@ int main(int argc, char** argv)
     // initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
-        SDL_Log("Could not initialize SDL\n");
+        SDL_Log("Could not initialize SDL");
         return 1;
     }
     
@@ -240,7 +271,6 @@ int main(int argc, char** argv)
     // create window and renderer
     _window = SDL_CreateWindow(NULL, 0, 0, displayMode.w, displayMode.h,
                                           SDL_WINDOW_OPENGL|SDL_WINDOW_FULLSCREEN|SDL_WINDOW_RESIZABLE);
-    
     if(!_window)
     {
         SDL_Log("Could not initialize Window");
@@ -255,54 +285,44 @@ int main(int argc, char** argv)
     }
     
     SDL_iPhoneSetAnimationCallback(_window, 1, UpdateFrame, NULL);
-    SDL_AddEventWatch(EventFilter, NULL);
+    SDL_AddEventWatch(AppEvents, NULL);
     
     //Game Loop
     SDL_Event event;
     auto done = false;
-    while (!done)
+    while(!done)
     {
-        SDL_PumpEvents();
         while (SDL_PollEvent(&event))
         {
             switch(event.type)
             {
                 case SDL_QUIT:
+                {
                     done = true;
-                break;
-                    
-                case SDL_APP_DIDENTERFOREGROUND:
-                    SDL_Log("SDL_APP_DIDENTERFOREGROUND");
-                break;
-                    
-                case SDL_APP_DIDENTERBACKGROUND:
-                    SDL_Log("SDL_APP_DIDENTERBACKGROUND");
-                break;
-                    
-                case SDL_APP_LOWMEMORY:
-                    SDL_Log("SDL_APP_LOWMEMORY");
-                break;
-                    
-                case SDL_APP_TERMINATING:
-                    SDL_Log("SDL_APP_TERMINATING");
-                break;
-                    
-                case SDL_APP_WILLENTERBACKGROUND:
-                    SDL_Log("SDL_APP_WILLENTERBACKGROUND");
-                break;
-                    
-                case SDL_APP_WILLENTERFOREGROUND:
-                    SDL_Log("SDL_APP_WILLENTERFOREGROUND");
-                break;
-                    
+                    break;
+                }
+                case SDL_FINGERMOTION:
+                {
+                    SDL_Log("Finger Motion");
+                    break;
+                }
+                case SDL_FINGERDOWN:
+                {
+                    SDL_Log("Finger Down");
+                    break;
+                }
+                case SDL_FINGERUP:
+                {
+                    SDL_Log("Finger Up");
+                    break;
+                }
                 case SDL_WINDOWEVENT:
                 {
-                    switch (event.window.event)
+                    switch(event.window.event)
                     {
                         case SDL_WINDOWEVENT_RESIZED:
                         {
                             SDL_Log("Window %d resized to %dx%d", event.window.windowID, event.window.data1, event.window.data2);
-                            
                             break;
                         }
                     }
@@ -310,7 +330,6 @@ int main(int argc, char** argv)
             }
         }
     }
-    
     SDL_GL_DeleteContext(gl);
     // Done! Close the window, clean-up and exit the program.
     SDL_DestroyWindow(_window);
